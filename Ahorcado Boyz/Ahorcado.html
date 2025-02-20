@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego del Ahorcado</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        canvas {
+            display: block;
+            margin: auto;
+            background: #2b2b2b;
+        }
+        .letter-buttons {
+            margin-top: 10px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:disabled {
+            background-color: grey;
+        }
+        #message {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Juego del Ahorcado</h1>
+    <div id="game-container"></div>
+    <p id="message"></p>
+    <button id="restart" onclick="resetGame()" style="display: none;">Jugar de nuevo</button>
+    <script>
+        let palabras = ["Spot", "Respawn", "Moon", "Vas medicat", "Uuuuula", "Clitz", "Zzzzzzzz", "Figo", "Mauro", "Szczesny", "Hawkins", "Ves a la merda", "Nonono"];
+        let palabraSecreta;
+        let palabraAdivinada;
+        let intentos;
+        let letrasUsadas;
+        
+        function setup() {
+            createCanvas(400, 400);
+            resetGame();
+        }
+
+        function draw() {
+            background(43);
+            drawGallows();
+            drawWord();
+            drawLettersUsed();
+            drawAttemptsLeft();
+            checkGameOver();
+        }
+
+        function resetGame() {
+            palabraSecreta = random(palabras).toUpperCase();
+            palabraAdivinada = palabraSecreta.split('').map(c => c === ' ' ? ' ' : '_');
+            intentos = 6;
+            letrasUsadas = [];
+            document.getElementById("message").innerText = "";
+            document.getElementById("restart").style.display = "none";
+            loop();
+        }
+
+        function keyPressed() {
+            let letra = key.toUpperCase();
+            if (/^[A-Z]$/.test(letra) && !letrasUsadas.includes(letra) && intentos > 0) {
+                letrasUsadas.push(letra);
+                if (palabraSecreta.includes(letra)) {
+                    for (let i = 0; i < palabraSecreta.length; i++) {
+                        if (palabraSecreta[i] === letra) {
+                            palabraAdivinada[i] = letra;
+                        }
+                    }
+                } else {
+                    intentos--;
+                }
+            }
+        }
+
+        function drawGallows() {
+            stroke(255);
+            line(100, 350, 300, 350);
+            line(200, 350, 200, 100);
+            line(200, 100, 270, 100);
+            line(270, 100, 270, 130);
+            if (intentos <= 5) circle(270, 150, 40);
+            if (intentos <= 4) line(270, 170, 270, 250);
+            if (intentos <= 3) line(270, 190, 240, 220);
+            if (intentos <= 2) line(270, 190, 300, 220);
+            if (intentos <= 1) line(270, 250, 240, 300);
+            if (intentos <= 0) line(270, 250, 300, 300);
+        }
+
+        function drawWord() {
+            fill(255);
+            textSize(32);
+            textAlign(CENTER);
+            text(palabraAdivinada.join(" "), width / 2, 50);
+        }
+
+        function drawLettersUsed() {
+            fill(255);
+            textSize(20);
+            text("Letras usadas: " + letrasUsadas.join(", "), width / 2, 380);
+        }
+
+        function drawAttemptsLeft() {
+            fill(255, 0, 0);
+            textSize(24);
+            text("Intentos restantes: " + intentos, width / 2, 350);
+        }
+
+        function checkGameOver() {
+            if (!palabraAdivinada.includes("_")) {
+                document.getElementById("message").innerText = "¡Felicidades, ganaste!";
+                document.getElementById("restart").style.display = "block";
+                noLoop();
+            } else if (intentos <= 0) {
+                document.getElementById("message").innerText = "¡Perdiste! La palabra era: " + palabraSecreta;
+                document.getElementById("restart").style.display = "block";
+                noLoop();
+            }
+        }
+    </script>
+</body>
+</html>
